@@ -13,10 +13,11 @@ class TextClusteringService:
         self.vectorizer = TfidfVectorizer(
             max_features=5000,  # Increased for better Chinese character coverage
             stop_words=None,    # No stop words for Chinese
-            max_df=1.0,        # Allow terms that appear in all documents
-            min_df=0.0,        # Allow all terms, even those appearing once
-            token_pattern=r'(?u)\b\w+\b',  # Allow single characters for Chinese
-            analyzer=lambda x: list(jieba.cut(x))  # Use jieba for Chinese tokenization
+            max_df=0.95,        # Allow terms that appear in most documents
+            min_df=1,           # Keep terms that appear at least once
+            token_pattern=r'(?u)\w+',  # Simplified pattern to catch Chinese characters
+            ngram_range=(1, 2), # Include bigrams for better phrase capture
+            analyzer='char'     # Use character-level analysis for Chinese
         )
 
         # Initialize clustering models with simplified IDs
