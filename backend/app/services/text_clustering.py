@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 import numpy as np
 from collections import Counter
 import jieba
+import re
 
 class TextClusteringService:
     def __init__(self):
@@ -29,22 +30,22 @@ class TextClusteringService:
         """Preprocess Chinese texts with minimal cleaning to preserve meaningful content"""
         processed_texts = []
         for text in texts:
-            # Remove only basic punctuation while preserving Chinese punctuation
-            text = ''.join(char for char in text if not (char.isspace() and char not in '，。！？；：'))
-            # Tokenize with jieba and join with spaces
-            tokens = jieba.cut(text)
-            # Preserve all tokens, including single characters
-            processed_text = ' '.join(token for token in tokens)
-            processed_texts.append(processed_text)
+            # Remove only specific punctuation that doesn't carry meaning
+            text = re.sub(r'[!@#$%^&*()_+=\[\]{};:"|<>?`~]', ' ', text)
+            # Keep Chinese punctuation like "，", "。", "：" as they can be meaningful
+            # Keep numbers and letters as they might be important in customer service context
+            text = text.strip()
+            if text:  # Only add non-empty texts
+                processed_texts.append(text)
         return processed_texts
 
     def get_embeddings(self, texts: List[str]) -> np.ndarray:
         """Convert texts to embeddings using TF-IDF with Chinese preprocessing"""
         processed_texts = self.preprocess_chinese_text(texts)
-        # Fit vectorizer first to build vocabulary
-        self.vectorizer.fit(processed_texts)
-        # Then transform texts to get embeddings
-        return self.vectorizer.transform(processed_texts).toarray()
+        if not processed_texts:
+            raise ValueError("No valid texts after preprocessing")
+        # Fit and transform in one step to ensure consistent vocabulary
+        return self.vectorizer.fit_transform(processed_texts).toarray()
 
     def get_cluster_summary(self, texts: List[str]) -> str:
         """Generate one-sentence summary for a cluster using frequency analysis of Chinese text"""
