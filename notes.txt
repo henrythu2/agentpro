@@ -1,0 +1,39 @@
+Investigation Notes: Model Deployment and Usage Issues
+
+1. Backend Implementation Issues (text_clustering.py):
+- get_cluster_summary() is incomplete (just returns first text)
+- Model parameters may need optimization:
+  * KMeans: Only using random_state
+  * Agglomerative: No distance metric specified
+  * DBSCAN: Fixed eps and min_samples might not work for all cases
+- TF-IDF parameters might need tuning for Chinese text
+
+2. API Implementation Issues (clustering.py router):
+- Using external services for model management
+- Need to verify error handling for clustering requests
+- Need to check model configuration for Chinese text
+
+3. Deployment Configuration Status:
+- Verified Dockerfile configuration is correct:
+  * Using poetry run with uvicorn directly
+  * Command: ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+  * Poetry virtualenvs.create false for proper environment setup
+  * Dependencies properly installed in container
+- No changes needed to deployment configuration
+- Previous FastAPI CLI error resolved by existing poetry setup
+
+4. Chinese Text Processing Issues:
+- TF-IDF vectorizer using English stop words
+- No specific Chinese text tokenization
+- Parameters may need adjustment for Chinese language characteristics
+
+5. Model Selection and Usage:
+- Models defined but may not be properly initialized
+- Need to verify model endpoint accessibility
+- Clustering parameters may need optimization for Chinese text
+- No specific handling for Chinese text characteristics
+
+Next Steps:
+1. Add Chinese text processing support (jieba integration)
+2. Optimize clustering parameters for Chinese text
+3. Improve cluster summary generation
