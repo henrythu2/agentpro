@@ -11,13 +11,12 @@ class TextClusteringService:
     def __init__(self):
         # Initialize TF-IDF vectorizer for text embeddings
         self.vectorizer = TfidfVectorizer(
-            max_features=5000,  # Increased for better Chinese character coverage
+            max_features=None,  # No limit on features
             stop_words=None,    # No stop words for Chinese
-            max_df=0.95,        # Allow terms that appear in most documents
+            max_df=1.0,         # Allow terms that appear in all documents
             min_df=1,           # Keep terms that appear at least once
-            token_pattern=r'(?u)\w+',  # Simplified pattern to catch Chinese characters
-            ngram_range=(1, 2), # Include bigrams for better phrase capture
-            analyzer='char'     # Use character-level analysis for Chinese
+            token_pattern=r'(?u)\b\w+\b',  # Default pattern
+            analyzer=lambda x: list(jieba.cut(x))  # Use jieba's default tokenization
         )
 
         # Initialize clustering models with simplified IDs
@@ -28,25 +27,37 @@ class TextClusteringService:
         }
 
     def preprocess_chinese_text(self, texts: List[str]) -> List[str]:
-        """Preprocess Chinese texts with minimal cleaning to preserve meaningful content"""
+        """Minimal preprocessing for Chinese text."""
         processed_texts = []
         for text in texts:
-            # Remove only specific punctuation that doesn't carry meaning
-            text = re.sub(r'[!@#$%^&*()_+=\[\]{};:"|<>?`~]', ' ', text)
-            # Keep Chinese punctuation like "，", "。", "：" as they can be meaningful
-            # Keep numbers and letters as they might be important in customer service context
+            # Only remove basic punctuation and whitespace
+            text = re.sub(r'[^\w\s\u4e00-\u9fff，。：]', '', text)
             text = text.strip()
             if text:  # Only add non-empty texts
                 processed_texts.append(text)
         return processed_texts
 
     def get_embeddings(self, texts: List[str]) -> np.ndarray:
-        """Convert texts to embeddings using TF-IDF with Chinese preprocessing"""
+        """Convert texts to TF-IDF embeddings with detailed error handling."""
         processed_texts = self.preprocess_chinese_text(texts)
         if not processed_texts:
             raise ValueError("No valid texts after preprocessing")
-        # Fit and transform in one step to ensure consistent vocabulary
-        return self.vectorizer.fit_transform(processed_texts).toarray()
+
+        try:
+            # Print debug info
+            print(f"Processing {len(processed_texts)} texts")
+            print("Sample processed text:", processed_texts[0])
+            print("Tokenization sample:", list(jieba.cut(processed_texts[0])))
+
+            # Fit and transform with error handling
+            embeddings = self.vectorizer.fit_transform(processed_texts)
+            print(f"Vocabulary size: {len(self.vectorizer.vocabulary_)}")
+            print(f"Features shape: {embeddings.shape}")
+            return embeddings.toarray()
+        except ValueError as e:
+            print(f"Vectorization error: {str(e)}")
+            print(f"Processed texts: {processed_texts}")
+            raise ValueError(f"Failed to vectorize texts: {str(e)}")
 
     def get_cluster_summary(self, texts: List[str]) -> str:
         """Generate one-sentence summary for a cluster using frequency analysis of Chinese text"""

@@ -14,4 +14,10 @@ async def create_clustering(request: ClusteringRequest):
     try:
         return await perform_clustering(request)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Enhanced error handling with debug info
+        error_msg = f"Clustering failed: {str(e)}\n"
+        if hasattr(e, '__cause__'):
+            error_msg += f"Cause: {str(e.__cause__)}\n"
+        if hasattr(e, '__context__'):
+            error_msg += f"Context: {str(e.__context__)}\n"
+        raise HTTPException(status_code=500, detail=error_msg)
