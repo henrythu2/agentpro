@@ -66,13 +66,26 @@ export function TaskEditor({ initialTask }: TaskEditorProps) {
           <div className="flex justify-end space-x-3 pt-4">
             <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">预览</Button>
+                <Button 
+                  variant="outline"
+                  disabled={!task.name || !task.description || !task.strategy}
+                  title={!task.name || !task.description || !task.strategy ? 
+                    "请先完成任务配置" : "预览并测试任务"}
+                >
+                  预览
+                </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-3xl">
+              <DialogContent className="max-w-4xl h-[80vh]">
                 <DialogHeader>
-                  <DialogTitle>任务预览</DialogTitle>
+                  <DialogTitle>任务预览 - {task.name}</DialogTitle>
                 </DialogHeader>
-                <div className="mt-4">
+                <div className="mt-4 flex-1 overflow-hidden">
+                  <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <h3 className="text-sm font-medium text-gray-700 mb-2">当前任务配置</h3>
+                    <p className="text-sm text-gray-600 mb-1">描述: {task.description}</p>
+                    <p className="text-sm text-gray-600 mb-1">策略:</p>
+                    <pre className="text-sm bg-white p-2 rounded border">{task.strategy}</pre>
+                  </div>
                   <ChatPreview taskConfig={task} />
                 </div>
               </DialogContent>
