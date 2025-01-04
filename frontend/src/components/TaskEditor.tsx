@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { ChatPreview } from './ChatPreview';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Textarea } from './ui/textarea';
@@ -72,10 +73,7 @@ export function TaskEditor({ initialTask }: TaskEditorProps) {
                   <DialogTitle>任务预览</DialogTitle>
                 </DialogHeader>
                 <div className="mt-4">
-                  {/* Claude chat interface will be implemented here */}
-                  <div className="h-96 border rounded-lg p-4">
-                    <p className="text-gray-500">Claude chat interface loading...</p>
-                  </div>
+                  <ChatPreview taskConfig={task} />
                 </div>
               </DialogContent>
             </Dialog>

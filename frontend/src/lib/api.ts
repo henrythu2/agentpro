@@ -21,9 +21,9 @@ class ApiClient {
     await this.axios.post('/api/tasks', taskConfig);
   }
 
-  async startClaudeChat(taskConfig: TaskConfig): Promise<string> {
+  async startClaudeChat(taskConfig: TaskConfig): Promise<{ chatId: string }> {
     const response = await this.axios.post('/api/chat/start', taskConfig);
-    return response.data.chatId;
+    return response.data;
   }
 
   async sendMessage(chatId: string, message: string): Promise<any> {
